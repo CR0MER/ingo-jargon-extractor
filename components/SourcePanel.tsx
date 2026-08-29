@@ -3,15 +3,15 @@
 import { useRef } from "react";
 
 interface SourcePanelProps {
-  onSubmitFile: (file: File) => void;
+  onSubmitFiles: (files: File[]) => void;
 }
 
-export function SourcePanel({ onSubmitFile }: SourcePanelProps) {
+export function SourcePanel({ onSubmitFiles }: SourcePanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleFiles(files: FileList | null) {
-    const file = files?.[0];
-    if (file) onSubmitFile(file);
+  function handleFiles(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return;
+    onSubmitFiles(Array.from(fileList));
   }
 
   return (
@@ -30,7 +30,7 @@ export function SourcePanel({ onSubmitFile }: SourcePanelProps) {
       >
         <div className="mb-[5px] text-13 font-medium">Drop raw text</div>
         <div className="font-mono text-10.5 leading-[1.6] text-text-muted">
-          .srt .vtt .txt
+          .srt .vtt .txt — one file or a whole batch
           <br />
           or click to browse
         </div>
@@ -39,8 +39,12 @@ export function SourcePanel({ onSubmitFile }: SourcePanelProps) {
         ref={fileInputRef}
         type="file"
         accept=".srt,.vtt,.txt"
+        multiple
         className="hidden"
-        onChange={(e) => handleFiles(e.target.files)}
+        onChange={(e) => {
+          handleFiles(e.target.files);
+          e.target.value = "";
+        }}
       />
     </section>
   );

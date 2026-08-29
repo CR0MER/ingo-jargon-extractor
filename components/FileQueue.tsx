@@ -6,7 +6,7 @@ interface FileQueueProps {
   showQueue: boolean;
   onToggleQueue: () => void;
   phase: Phase;
-  sourceName: string | null;
+  sourceNames: string[];
 }
 
 function queueEntry(phase: Phase) {
@@ -24,10 +24,16 @@ function queueEntry(phase: Phase) {
   };
 }
 
-export function FileQueue({ showQueue, onToggleQueue, phase, sourceName }: FileQueueProps) {
+export function FileQueue({ showQueue, onToggleQueue, phase, sourceNames }: FileQueueProps) {
   const queueLabel =
-    phase === "empty" ? "idle" : phase === "results" ? "1 / 1" : phase === "error" ? "error" : "running";
-  const entry = sourceName ? { name: sourceName, ...queueEntry(phase) } : null;
+    phase === "empty"
+      ? "idle"
+      : phase === "results"
+        ? `${sourceNames.length} / ${sourceNames.length}`
+        : phase === "error"
+          ? "error"
+          : "running";
+  const entry = queueEntry(phase);
 
   return (
     <section className="border-b border-border-subtle px-5 py-4.5">
@@ -44,21 +50,23 @@ export function FileQueue({ showQueue, onToggleQueue, phase, sourceName }: FileQ
         </div>
       </div>
 
-      {showQueue && entry && (
+      {showQueue && sourceNames.length > 0 && (
         <div className="flex flex-col gap-11">
-          <div className="flex flex-col gap-[5px]">
-            <div className="flex items-baseline gap-2">
-              <span className="truncate font-mono text-11.5 text-text-control">{entry.name}</span>
-              <div className="flex-1" />
-              <span className={`text-10.5 ${entry.stageColor}`}>{entry.stage}</span>
+          {sourceNames.map((name) => (
+            <div key={name} className="flex flex-col gap-[5px]">
+              <div className="flex items-baseline gap-2">
+                <span className="truncate font-mono text-11.5 text-text-control">{name}</span>
+                <div className="flex-1" />
+                <span className={`text-10.5 ${entry.stageColor}`}>{entry.stage}</span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-2 bg-border-subtle">
+                <div
+                  className={`h-full rounded-2 transition-[width] duration-500 ease-[ease] ${entry.barColor}`}
+                  style={{ width: `${entry.pct}%` }}
+                />
+              </div>
             </div>
-            <div className="h-1 overflow-hidden rounded-2 bg-border-subtle">
-              <div
-                className={`h-full rounded-2 transition-[width] duration-500 ease-[ease] ${entry.barColor}`}
-                style={{ width: `${entry.pct}%` }}
-              />
-            </div>
-          </div>
+          ))}
         </div>
       )}
     </section>

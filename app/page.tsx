@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { ExportModal } from "@/components/ExportModal";
@@ -17,11 +17,17 @@ import { ingoReducer, initialState } from "@/lib/store";
 
 export default function Page() {
   const [state, dispatch] = useReducer(ingoReducer, initialState);
+  const [files, setFiles] = useState<File[]>([]);
 
-  async function runIngest(sourceName: string, input: { file?: File; text?: string }) {
-    dispatch({ type: "INGEST_START", sourceName });
+  // New files join the existing batch rather than replacing it — a show's
+  // jargon only shows up once enough episodes are in the same corpus, so
+  // every submission re-scores the full accumulated set from scratch.
+  async function submitFiles(newFiles: File[]) {
+    const allFiles = [...files, ...newFiles];
+    setFiles(allFiles);
+    dispatch({ type: "INGEST_START", sourceNames: allFiles.map((f) => f.name) });
     try {
-      const terms = await ingest(input);
+      const terms = await ingest({ files: allFiles });
       dispatch({ type: "INGEST_SUCCESS", terms });
     } catch (err) {
       dispatch({
@@ -65,12 +71,12 @@ export default function Page() {
       >
         {state.showPanel && (
           <aside className="no-scrollbar sticky top-[56px] flex max-h-[calc(100vh-56px)] flex-col overflow-y-auto border-r border-border bg-surface">
-            <SourcePanel onSubmitFile={(file) => runIngest(file.name, { file })} />
+            <SourcePanel onSubmitFiles={submitFiles} />
             <FileQueue
               showQueue={state.showQueue}
               onToggleQueue={() => dispatch({ type: "TOGGLE_QUEUE" })}
               phase={state.phase}
-              sourceName={state.sourceName}
+              sourceNames={state.sourceNames}
             />
             <TuningPanel
               enabled={state.phase === "results"}
@@ -93,7 +99,7 @@ export default function Page() {
 
         <main>
           {state.phase === "empty" && <EmptyState />}
-          {state.phase === "running" && <RunningState sourceName={state.sourceName} />}
+          {state.phase === "running" && <RunningState sourceNames={state.sourceNames} />}
           {state.phase === "error" && (
             <ErrorState
               message={state.error ?? "Something went wrong."}

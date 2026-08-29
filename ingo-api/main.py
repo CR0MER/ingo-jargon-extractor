@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import Optional
 
-from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -104,23 +104,28 @@ def _score_text(
 
 @app.post("/ingest", response_model=list[Term])
 async def ingest(
-    file: Optional[UploadFile] = None,
+    files: list[UploadFile] = File(default=[]),
     text: Optional[str] = Form(None),
     min_keyness: float = Form(DEFAULT_MIN_KEYNESS),
     min_occurrence: int = Form(DEFAULT_MIN_OCCURRENCE),
 ) -> list[Term]:
-    if file is None and not text:
-        raise HTTPException(400, "Provide either a file or text.")
+    if not files and not text:
+        raise HTTPException(400, "Provide at least one file or text.")
 
-    if file is not None:
-        data = await file.read()
+    # A whole show's jargon is only visible across its episodes, so every
+    # uploaded file is one corpus: parsed separately (each keeps its own
+    # subtitle format), then concatenated and scored as a single text.
+    parts: list[str] = []
+    for f in files:
+        data = await f.read()
         try:
-            source_text = parse_file(file.filename or "", data)
+            parts.append(parse_file(f.filename or "", data))
         except ValueError as e:
             raise HTTPException(400, str(e)) from e
-    else:
-        source_text = text or ""
+    if text:
+        parts.append(text)
 
+    source_text = "\n".join(p for p in parts if p.strip())
     if not source_text.strip():
         raise HTTPException(400, "No text extracted from input.")
 

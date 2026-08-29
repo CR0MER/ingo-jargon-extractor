@@ -21,8 +21,6 @@ def test_particles_and_auxiliaries_are_not_jargon_candidates():
 
 
 def test_display_term_uses_lemma_only_for_conjugating_pos():
-    # Verbs/adjectives/auxiliaries collapse inflected surface forms to
-    # their dictionary lemma (README: "lemma before lookup, always").
     assert display_term("走っ", "走る", "動詞") == "走る"
     assert display_term("高かっ", "高い", "形容詞") == "高い"
 

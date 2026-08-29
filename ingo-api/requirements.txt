@@ -7,4 +7,5 @@ jamdict
 jamdict-data
 pysrt
 webvtt-py
+ftfy
 pytest

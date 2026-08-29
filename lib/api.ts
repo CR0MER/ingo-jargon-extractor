@@ -3,16 +3,18 @@ import type { Term } from "./types";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface IngestInput {
-  file?: File;
+  files?: File[];
   text?: string;
 }
 
 /** POSTs to the real ingo-api backend's synchronous /ingest endpoint and
  * returns the finished, scored term list. No job polling — see
- * ingo-api/main.py. */
+ * ingo-api/main.py. All files are concatenated server-side and scored as
+ * one corpus, so a whole show's episodes surface jargon a single episode
+ * wouldn't. */
 export async function ingest(input: IngestInput): Promise<Term[]> {
   const body = new FormData();
-  if (input.file) body.append("file", input.file);
+  for (const file of input.files ?? []) body.append("files", file);
   if (input.text) body.append("text", input.text);
 
   let res: Response;

@@ -17,12 +17,16 @@ const sampleTerms: Term[] = [
 ];
 
 describe("ingoReducer ingest lifecycle", () => {
-  it("INGEST_START enters the running phase and records the source", () => {
+  it("INGEST_START enters the running phase and records the sources", () => {
     const state = ingoReducer(initialState, {
       type: "INGEST_START",
-      sourceName: "sample.txt",
+      sourceNames: ["ep01.srt", "ep02.srt"],
     });
-    expect(state).toMatchObject({ phase: "running", sourceName: "sample.txt", error: null });
+    expect(state).toMatchObject({
+      phase: "running",
+      sourceNames: ["ep01.srt", "ep02.srt"],
+      error: null,
+    });
   });
 
   it("INGEST_SUCCESS stores the real terms and resets pagination/ignored", () => {
@@ -37,7 +41,7 @@ describe("ingoReducer ingest lifecycle", () => {
   it("INGEST_ERROR enters the error phase with a message", () => {
     const running = ingoReducer(initialState, {
       type: "INGEST_START",
-      sourceName: "sample.txt",
+      sourceNames: ["sample.txt"],
     });
     const state = ingoReducer(running, {
       type: "INGEST_ERROR",

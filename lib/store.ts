@@ -8,11 +8,12 @@ export type PosChip = Extract<Pos, "NOUN" | "VERB" | "ADJ">;
 
 /** Mirrors the README's "State Management" table, adapted for the real
  * synchronous backend: `runPct`/`runStep` (fake progress) are gone,
- * `terms` holds the real scored set from the last ingest, `sourceName`
- * and `error` back the Running/Error states. */
+ * `terms` holds the real scored set from the last ingest (all submitted
+ * files scored together as one corpus), `sourceNames` and `error` back
+ * the Running/Error states. */
 export interface IngoState {
   phase: Phase;
-  sourceName: string | null;
+  sourceNames: string[];
   terms: Term[];
   error: string | null;
   showPanel: boolean;
@@ -35,13 +36,13 @@ export interface IngoState {
 
 export const initialState: IngoState = {
   phase: "empty",
-  sourceName: null,
+  sourceNames: [],
   terms: [],
   error: null,
   showPanel: true,
   showQueue: true,
   cutoffLo: 6000,
-  cutoffHi: 50000,
+  cutoffHi: 100000,
   minOcc: 3,
   grams: { 1: true, 2: true, 3: true },
   noEntities: true,
@@ -59,7 +60,7 @@ export const initialState: IngoState = {
 export type IngoAction =
   | { type: "TOGGLE_PANEL" }
   | { type: "TOGGLE_QUEUE" }
-  | { type: "INGEST_START"; sourceName: string }
+  | { type: "INGEST_START"; sourceNames: string[] }
   | { type: "INGEST_SUCCESS"; terms: Term[] }
   | { type: "INGEST_ERROR"; message: string }
   | { type: "RETRY" }
@@ -87,7 +88,7 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
     case "TOGGLE_QUEUE":
       return { ...state, showQueue: !state.showQueue };
     case "INGEST_START":
-      return { ...state, phase: "running", sourceName: action.sourceName, error: null };
+      return { ...state, phase: "running", sourceNames: action.sourceNames, error: null };
     case "INGEST_SUCCESS":
       return { ...state, phase: "results", terms: action.terms, page: 1, ignored: [] };
     case "INGEST_ERROR":
@@ -101,7 +102,11 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
     case "INC_MIN_OCC":
       return { ...state, minOcc: Math.min(12, state.minOcc + 1) };
     case "DEC_MIN_OCC":
-      return { ...state, minOcc: Math.max(1, state.minOcc - 1) };
+      // Floor of 2, not 1: ingo-api's DEFAULT_MIN_OCCURRENCE already drops
+      // any term seen only once before it ever reaches the frontend, so a
+      // ">=1" setting here would look adjustable but never change the
+      // visible set.
+      return { ...state, minOcc: Math.max(2, state.minOcc - 1) };
     case "TOGGLE_GRAM":
       return {
         ...state,

@@ -18,7 +18,7 @@ def test_corpus_rank_direct_hit():
 
 
 def test_corpus_rank_miss_is_list_length_plus_one_not_zero():
-    # README: a missing term is rarer than the ceiling, not rank 0.
+    # a missing term is rarer than the ceiling, not rank 0.
     assert score_module.corpus_rank("未知語") == 101
 
 

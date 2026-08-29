@@ -1,24 +1,26 @@
-"""
-Extracts plain text from subtitle/text input. Per the README:
-- .srt via pysrt, .vtt via webvtt-py, .txt as raw text.
-- Strip speaker labels, HTML tags, and furigana ruby annotations.
-- NFKC-normalize early
-
-.mkv extraction needs ffmpeg to pull the embedded subtitle track, which
-isn't available in this environment — raises rather than silently
-skipping, so a .mkv upload fails loudly instead of returning empty text.
-"""
-
 import io
 import re
 import unicodedata
 
+import ftfy
 import pysrt
 import webvtt
 
 _SPEAKER_LABEL = re.compile(r"^\s*[\[［(（]?[^\]）)：:]{1,12}[)）\]］]?\s*[:：]\s*")
 _HTML_TAG = re.compile(r"<[^>]+>")
 _RUBY_TEXT = re.compile(r"[｜|][^《]+《[^》]+》|《[^》]+》")
+
+
+def _decode(data: bytes) -> str:
+    """Decodes as UTF-8, then repairs mojibake. A common real-world case:
+    a file whose UTF-8 bytes were previously mis-decoded as Latin-1/cp1252
+    by some other tool and re-saved that way is still valid UTF-8 on disk
+    (decoding "succeeds"), but the Japanese comes out as runs of Latin-1
+    Supplement characters instead of kana/kanji. ftfy detects and reverses
+    that specific corruption; text that was never mangled passes through
+    unchanged.
+    """
+    return ftfy.fix_text(data.decode("utf-8", errors="replace"))
 
 
 def _clean_line(line: str) -> str:
@@ -30,19 +32,19 @@ def _clean_line(line: str) -> str:
 
 
 def parse_srt(data: bytes) -> str:
-    subs = pysrt.from_string(data.decode("utf-8", errors="replace"))
+    subs = pysrt.from_string(_decode(data))
     lines = [_clean_line(sub.text) for sub in subs]
     return "\n".join(line for line in lines if line)
 
 
 def parse_vtt(data: bytes) -> str:
-    captions = webvtt.read_buffer(io.StringIO(data.decode("utf-8", errors="replace")))
+    captions = webvtt.read_buffer(io.StringIO(_decode(data)))
     lines = [_clean_line(caption.text) for caption in captions]
     return "\n".join(line for line in lines if line)
 
 
 def parse_txt(data: bytes) -> str:
-    return unicodedata.normalize("NFKC", data.decode("utf-8", errors="replace"))
+    return unicodedata.normalize("NFKC", _decode(data))
 
 
 def parse_mkv(_data: bytes) -> str:
