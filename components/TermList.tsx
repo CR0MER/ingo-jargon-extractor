@@ -18,7 +18,7 @@ interface TermListProps {
 
 const SORT_COLUMNS: { key: SortKey; label: string }[] = [
   { key: "term", label: "A–Z" },
-  { key: "count", label: "Frequency" },
+  { key: "count", label: "Occurrences" },
   { key: "score", label: "Rarity" },
 ];
 
@@ -99,6 +99,12 @@ export function TermList({
                 <div className="flex-1" />
                 <span className="flex-none font-mono text-11 text-text-muted">
                   Top {rank.toLocaleString()}
+                </span>
+                <span
+                  title="Times seen in the uploaded text"
+                  className="flex-none font-mono text-11 text-text-muted"
+                >
+                  ×{term.count}
                 </span>
                 <button
                   type="button"

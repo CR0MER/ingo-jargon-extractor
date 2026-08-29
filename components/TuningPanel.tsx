@@ -10,6 +10,7 @@ interface TuningPanelProps {
   minOcc: number;
   grams: Record<NgramLength, boolean>;
   noEntities: boolean;
+  noKatakana: boolean;
   posOn: Record<PosChip, boolean>;
   onSetCutoffLo: (value: number) => void;
   onSetCutoffHi: (value: number) => void;
@@ -17,6 +18,7 @@ interface TuningPanelProps {
   onDecMinOcc: () => void;
   onToggleGram: (ngram: NgramLength) => void;
   onToggleEntities: () => void;
+  onToggleKatakana: () => void;
   onTogglePos: (pos: PosChip) => void;
 }
 
@@ -34,6 +36,7 @@ export function TuningPanel({
   minOcc,
   grams,
   noEntities,
+  noKatakana,
   posOn,
   onSetCutoffLo,
   onSetCutoffHi,
@@ -41,6 +44,7 @@ export function TuningPanel({
   onDecMinOcc,
   onToggleGram,
   onToggleEntities,
+  onToggleKatakana,
   onTogglePos,
 }: TuningPanelProps) {
   const windowLeft = ((cutoffLo - 1000) / 99000) * 100 + "%";
@@ -153,6 +157,19 @@ export function TuningPanel({
               {noEntities ? "✓" : ""}
             </span>
             <span>Exclude named entities</span>
+          </label>
+          <label
+            onClick={onToggleKatakana}
+            className="flex cursor-pointer items-start gap-9 text-12.5 leading-[1.35] text-text-control"
+          >
+            <span
+              className={`mt-px grid h-[15px] w-[15px] flex-none place-items-center rounded-4 border text-10 text-white ${
+                noKatakana ? "border-accent bg-accent" : "border-border-control bg-white"
+              }`}
+            >
+              {noKatakana ? "✓" : ""}
+            </span>
+            <span>Exclude katakana words</span>
           </label>
           <label className="flex cursor-pointer items-start gap-9 text-12.5 leading-[1.35] text-text-control">
             <span className="mt-px grid h-[15px] w-[15px] flex-none place-items-center rounded-4 border border-accent bg-accent text-10 text-white">

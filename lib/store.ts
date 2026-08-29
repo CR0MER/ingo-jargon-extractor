@@ -24,6 +24,7 @@ export interface IngoState {
   grams: Record<NgramLength, boolean>;
   noEntities: boolean;
   noSlang: boolean;
+  noKatakana: boolean;
   posOn: Record<PosChip, boolean>;
   sortKey: SortKey;
   sortDir: SortDir;
@@ -47,6 +48,10 @@ export const initialState: IngoState = {
   grams: { 1: true, 2: true, 3: true },
   noEntities: true,
   noSlang: true,
+  // Off by default, unlike noEntities/noSlang: katakana loanwords are
+  // often exactly the show-specific jargon this tool is for (fantasy
+  // magic terms, sci-fi tech words), not noise to hide by default.
+  noKatakana: false,
   posOn: { NOUN: true, VERB: true, ADJ: true },
   sortKey: "score",
   sortDir: -1,
@@ -71,6 +76,7 @@ export type IngoAction =
   | { type: "TOGGLE_GRAM"; ngram: NgramLength }
   | { type: "TOGGLE_ENTITIES" }
   | { type: "TOGGLE_SLANG" }
+  | { type: "TOGGLE_KATAKANA" }
   | { type: "TOGGLE_POS"; pos: PosChip }
   | { type: "SET_SORT"; key: SortKey }
   | { type: "SET_PAGE"; page: number }
@@ -116,6 +122,8 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
       return { ...state, noEntities: !state.noEntities };
     case "TOGGLE_SLANG":
       return { ...state, noSlang: !state.noSlang };
+    case "TOGGLE_KATAKANA":
+      return { ...state, noKatakana: !state.noKatakana };
     case "TOGGLE_POS":
       return {
         ...state,

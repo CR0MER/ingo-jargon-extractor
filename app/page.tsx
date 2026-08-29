@@ -46,6 +46,7 @@ export default function Page() {
       grams: state.grams,
       noEntities: state.noEntities,
       noSlang: state.noSlang,
+      noKatakana: state.noKatakana,
       posOn: state.posOn,
       ignored: state.ignored,
     });
@@ -85,6 +86,7 @@ export default function Page() {
               minOcc={state.minOcc}
               grams={state.grams}
               noEntities={state.noEntities}
+              noKatakana={state.noKatakana}
               posOn={state.posOn}
               onSetCutoffLo={(value) => dispatch({ type: "SET_CUTOFF_LO", value })}
               onSetCutoffHi={(value) => dispatch({ type: "SET_CUTOFF_HI", value })}
@@ -92,6 +94,7 @@ export default function Page() {
               onDecMinOcc={() => dispatch({ type: "DEC_MIN_OCC" })}
               onToggleGram={(ngram) => dispatch({ type: "TOGGLE_GRAM", ngram })}
               onToggleEntities={() => dispatch({ type: "TOGGLE_ENTITIES" })}
+              onToggleKatakana={() => dispatch({ type: "TOGGLE_KATAKANA" })}
               onTogglePos={(pos) => dispatch({ type: "TOGGLE_POS", pos })}
             />
           </aside>

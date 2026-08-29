@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { corpusRank, filterTerms, paginate, sortTerms } from "./filter";
+import { corpusRank, filterTerms, isKatakanaOnly, paginate, sortTerms } from "./filter";
 import type { FilterSettings } from "./filter";
 import type { Term } from "./types";
 
@@ -26,6 +26,7 @@ function baseSettings(overrides: Partial<FilterSettings> = {}): FilterSettings {
     grams: { 1: true, 2: true, 3: true },
     noEntities: false,
     noSlang: false,
+    noKatakana: false,
     posOn: { NOUN: true, VERB: true, ADJ: true },
     ignored: [],
     ...overrides,
@@ -36,6 +37,16 @@ describe("corpusRank", () => {
   it("reads the real rank the backend already computed", () => {
     expect(corpusRank(makeTerm({ corpusRank: 18500 }))).toBe(18500);
     expect(corpusRank(makeTerm({ corpusRank: 25500 }))).toBe(25500);
+  });
+});
+
+describe("isKatakanaOnly", () => {
+  it("is true only when every character is katakana", () => {
+    expect(isKatakanaOnly("タワー")).toBe(true);
+    expect(isKatakanaOnly("コンピューター")).toBe(true);
+    expect(isKatakanaOnly("魔法陣")).toBe(false);
+    expect(isKatakanaOnly("魔法タワー")).toBe(false);
+    expect(isKatakanaOnly("ありがとう")).toBe(false); // hiragana, not katakana
   });
 });
 
@@ -112,6 +123,19 @@ describe("filterTerms", () => {
     expect(
       filterTerms([intj], baseSettings({ noSlang: false })).map((t) => t.term)
     ).toEqual(["intj"]);
+  });
+
+  it("excludes katakana-only terms when noKatakana is on", () => {
+    const loanword = makeTerm({ term: "タワー" });
+    const kanjiTerm = makeTerm({ term: "魔法陣" });
+    const mixedTerm = makeTerm({ term: "魔法タワー" });
+
+    const result = filterTerms(
+      [loanword, kanjiTerm, mixedTerm],
+      baseSettings({ noKatakana: true })
+    );
+
+    expect(result.map((t) => t.term)).toEqual(["魔法陣", "魔法タワー"]);
   });
 
   it("respects POS chip combinations for NOUN/VERB/ADJ", () => {
