@@ -49,6 +49,7 @@ export default function Page() {
       noKatakana: state.noKatakana,
       posOn: state.posOn,
       ignored: state.ignored,
+      search: state.search,
     });
     return sortTerms(filtered, state.sortKey, state.sortDir);
   }, [state]);
@@ -116,9 +117,11 @@ export default function Page() {
               sortDir={state.sortDir}
               page={state.page}
               pageSize={state.pageSize}
+              search={state.search}
               onSort={(key) => dispatch({ type: "SET_SORT", key })}
               onSetPage={(page) => dispatch({ type: "SET_PAGE", page })}
               onSetPageSize={(size) => dispatch({ type: "SET_PAGE_SIZE", size })}
+              onSearchChange={(query) => dispatch({ type: "SET_SEARCH", query })}
               onIgnore={(term) => dispatch({ type: "IGNORE_TERM", term })}
             />
           )}

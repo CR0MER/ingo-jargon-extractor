@@ -29,6 +29,7 @@ function baseSettings(overrides: Partial<FilterSettings> = {}): FilterSettings {
     noKatakana: false,
     posOn: { NOUN: true, VERB: true, ADJ: true },
     ignored: [],
+    search: "",
     ...overrides,
   };
 }
@@ -151,6 +152,38 @@ describe("filterTerms", () => {
     );
 
     expect(result.map((t) => t.term)).toEqual(["n", "a"]);
+  });
+
+  it("filters by search query, case-insensitively, against term and reading", () => {
+    const kanji = makeTerm({ term: "魔法陣", reading: "まほうじん" });
+    const loanword = makeTerm({ term: "タワー" });
+    const other = makeTerm({ term: "剣" });
+
+    expect(
+      filterTerms([kanji, loanword, other], baseSettings({ search: "魔法" })).map(
+        (t) => t.term
+      )
+    ).toEqual(["魔法陣"]);
+
+    // Matches via the furigana reading too, not just the displayed term.
+    expect(
+      filterTerms([kanji, loanword, other], baseSettings({ search: "まほう" })).map(
+        (t) => t.term
+      )
+    ).toEqual(["魔法陣"]);
+
+    expect(
+      filterTerms([kanji, loanword, other], baseSettings({ search: "TAWA" })).map(
+        (t) => t.term
+      )
+    ).toEqual([]);
+
+    // Blank/whitespace-only query matches everything.
+    expect(
+      filterTerms([kanji, loanword, other], baseSettings({ search: "  " })).map(
+        (t) => t.term
+      )
+    ).toEqual(["魔法陣", "タワー", "剣"]);
   });
 
   it("removes ignored terms", () => {

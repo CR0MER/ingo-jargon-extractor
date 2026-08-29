@@ -10,9 +10,11 @@ interface TermListProps {
   sortDir: SortDir;
   page: number;
   pageSize: number;
+  search: string;
   onSort: (key: SortKey) => void;
   onSetPage: (page: number) => void;
   onSetPageSize: (size: number) => void;
+  onSearchChange: (query: string) => void;
   onIgnore: (term: string) => void;
 }
 
@@ -35,9 +37,11 @@ export function TermList({
   sortDir,
   page,
   pageSize,
+  search,
   onSort,
   onSetPage,
   onSetPageSize,
+  onSearchChange,
   onIgnore,
 }: TermListProps) {
   const { items, page: currentPage, pageCount, total } = paginate(terms, page, pageSize);
@@ -66,6 +70,15 @@ export function TermList({
               </div>
             );
           })}
+          <div className="flex-1" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search terms…"
+            aria-label="Search terms"
+            className="h-7 w-[180px] rounded-6 border border-border-control bg-white px-2.5 font-mono text-11 text-text-control placeholder:text-text-disabled-alt focus:border-accent-light focus:outline-none"
+          />
         </div>
 
         {items.map((term) => {
@@ -124,8 +137,9 @@ export function TermList({
 
         {items.length === 0 && (
           <div className="px-5 py-[44px] text-center text-13 text-text-muted">
-            No terms pass the current thresholds. Loosen aggression or lower the
-            minimum occurrence.
+            {search.trim()
+              ? `No terms match "${search.trim()}".`
+              : "No terms pass the current thresholds. Loosen aggression or lower the minimum occurrence."}
           </div>
         )}
       </div>

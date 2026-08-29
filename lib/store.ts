@@ -31,6 +31,7 @@ export interface IngoState {
   page: number;
   pageSize: number;
   ignored: string[];
+  search: string;
   modal: ModalKind;
   format: ExportFormat;
 }
@@ -58,6 +59,7 @@ export const initialState: IngoState = {
   page: 1,
   pageSize: 10,
   ignored: [],
+  search: "",
   modal: null,
   format: "anki",
 };
@@ -81,6 +83,7 @@ export type IngoAction =
   | { type: "SET_SORT"; key: SortKey }
   | { type: "SET_PAGE"; page: number }
   | { type: "SET_PAGE_SIZE"; size: number }
+  | { type: "SET_SEARCH"; query: string }
   | { type: "IGNORE_TERM"; term: string }
   | { type: "RESTORE_TERM"; term: string }
   | { type: "OPEN_MODAL"; modal: Exclude<ModalKind, null> }
@@ -96,7 +99,14 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
     case "INGEST_START":
       return { ...state, phase: "running", sourceNames: action.sourceNames, error: null };
     case "INGEST_SUCCESS":
-      return { ...state, phase: "results", terms: action.terms, page: 1, ignored: [] };
+      return {
+        ...state,
+        phase: "results",
+        terms: action.terms,
+        page: 1,
+        ignored: [],
+        search: "",
+      };
     case "INGEST_ERROR":
       return { ...state, phase: "error", error: action.message };
     case "RETRY":
@@ -139,6 +149,10 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
       return { ...state, page: action.page };
     case "SET_PAGE_SIZE":
       return { ...state, pageSize: action.size, page: 1 };
+    case "SET_SEARCH":
+      // A narrower/wider result set can shift which page makes sense,
+      // same reasoning as SET_PAGE_SIZE.
+      return { ...state, search: action.query, page: 1 };
     case "IGNORE_TERM":
       return { ...state, ignored: [...state.ignored, action.term] };
     case "RESTORE_TERM":

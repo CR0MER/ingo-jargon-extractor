@@ -13,6 +13,19 @@ export interface FilterSettings {
   noKatakana: boolean;
   posOn: Partial<Record<Pos, boolean>>;
   ignored: string[];
+  search: string;
+}
+
+/** Case-insensitive substring match against the term's display text and,
+ * when it has one, its furigana reading — so searching either the kanji
+ * or the kana finds the same word. */
+function matchesSearch(term: Term, query: string): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  return (
+    term.term.toLowerCase().includes(needle) ||
+    (term.reading?.toLowerCase().includes(needle) ?? false)
+  );
 }
 
 /**
@@ -46,16 +59,18 @@ export function corpusRank(term: Term): number {
 
 /**
  * A term is shown when all hold, per the README's "Filter semantics
- * (implement exactly)": not ignored, inside the frequency window, at or
- * above the min-occurrence cutoff, its n-gram chip is on, not an excluded
- * entity, not excluded slang, not an excluded katakana-only loanword, and
- * its POS chip is on — with the prototype's fall-through: PROPN passes
- * when entities aren't excluded, INTJ passes when slang isn't excluded,
- * regardless of the NOUN/VERB/ADJ chips.
+ * (implement exactly)": not ignored, matches the search query (if any),
+ * inside the frequency window, at or above the min-occurrence cutoff, its
+ * n-gram chip is on, not an excluded entity, not excluded slang, not an
+ * excluded katakana-only loanword, and its POS chip is on — with the
+ * prototype's fall-through: PROPN passes when entities aren't excluded,
+ * INTJ passes when slang isn't excluded, regardless of the NOUN/VERB/ADJ
+ * chips.
  */
 export function filterTerms(terms: Term[], settings: FilterSettings): Term[] {
   return terms.filter((term) => {
     if (settings.ignored.includes(term.term)) return false;
+    if (!matchesSearch(term, settings.search)) return false;
 
     const rank = corpusRank(term);
     if (rank < settings.cutoffLo || rank > settings.cutoffHi) return false;
