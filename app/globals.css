@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scrollbar-hidden container (left panel). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/*
+ * Dual-handle frequency-window slider. Two <input type=range> stacked over a
+ * shared track: the inputs themselves ignore pointer events so the track
+ * beneath is inert, but their thumbs re-enable pointer events so both
+ * handles stay grabbable.
+ */
+.ingo-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+.ingo-range::-webkit-slider-runnable-track {
+  height: 3px;
+  background: #ddd9d4;
+  border-radius: 2px;
+}
+.ingo-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -6px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid oklch(0.52 0.085 195);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.ingo-range-dual {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  pointer-events: none;
+}
+.ingo-range-dual::-webkit-slider-runnable-track {
+  background: transparent;
+}
+.ingo-range-dual::-webkit-slider-thumb {
+  pointer-events: auto;
+}

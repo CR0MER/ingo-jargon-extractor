@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+fugashi
+unidic-lite
+jamdict
+jamdict-data
+pysrt
+webvtt-py
+pytest
