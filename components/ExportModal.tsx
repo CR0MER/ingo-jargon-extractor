@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Modal } from "@/components/Modal";
 import { exportApkg } from "@/lib/api";
+import { toCsv } from "@/lib/csv";
 import type { ExportFormat } from "@/lib/store";
 import type { Term } from "@/lib/types";
 
@@ -47,7 +48,7 @@ const FORMATS: { id: ExportFormat; label: string; hint: string }[] = [
   {
     id: "csv",
     label: "Spreadsheet (CSV)",
-    hint: "Term, POS, rarity multiplier, raw count, source episode.",
+    hint: "Term, reading, POS, occurrences, corpus rank, rarity, definition.",
   },
 ];
 
@@ -62,8 +63,17 @@ export function ExportModal({ format, terms, onSetFormat, onClose }: ExportModal
   const [error, setError] = useState<string | null>(null);
 
   async function handleExport() {
+    if (format === "csv") {
+      // Pure client-side formatting of data already in hand — no backend
+      // round-trip needed, unlike the Anki export.
+      const blob = new Blob([toCsv(terms)], { type: "text/csv;charset=utf-8" });
+      downloadBlob(blob, "ingo-export.csv");
+      onClose();
+      return;
+    }
+
     if (format !== "anki") {
-      // TSV/CSV export isn't implemented yet.
+      // TSV export isn't implemented yet.
       onClose();
       return;
     }
