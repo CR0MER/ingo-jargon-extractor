@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { ExportModal } from "@/components/ExportModal";
@@ -11,13 +11,19 @@ import { RunningState } from "@/components/RunningState";
 import { SourcePanel } from "@/components/SourcePanel";
 import { TermList } from "@/components/TermList";
 import { TuningPanel } from "@/components/TuningPanel";
-import { ingest } from "@/lib/api";
+import { fetchVocabSize, ingest } from "@/lib/api";
 import { filterTerms, sortTerms } from "@/lib/filter";
 import { ingoReducer, initialState } from "@/lib/store";
 
 export default function Page() {
   const [state, dispatch] = useReducer(ingoReducer, initialState);
   const [files, setFiles] = useState<File[]>([]);
+
+  useEffect(() => {
+    fetchVocabSize().then((vocabSize) => {
+      if (vocabSize !== null) dispatch({ type: "SET_VOCAB_SIZE", vocabSize });
+    });
+  }, []);
 
   // New files join the existing batch rather than replacing it — a show's
   // jargon only shows up once enough episodes are in the same corpus, so
@@ -84,6 +90,7 @@ export default function Page() {
               enabled={state.phase === "results"}
               cutoffLo={state.cutoffLo}
               cutoffHi={state.cutoffHi}
+              maxRank={state.maxRank}
               minOcc={state.minOcc}
               grams={state.grams}
               noEntities={state.noEntities}

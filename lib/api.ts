@@ -31,3 +31,19 @@ export async function ingest(input: IngestInput): Promise<Term[]> {
 
   return res.json();
 }
+
+/** Fetches the reference corpus's real vocabulary size from GET /meta, so
+ * the frequency-window slider can span the actual data instead of a
+ * guessed ceiling. Returns null on any failure (backend not up yet,
+ * network error) — callers should fall back to a sane default rather
+ * than block on this. */
+export async function fetchVocabSize(): Promise<number | null> {
+  try {
+    const res = await fetch(`${API_URL}/meta`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data.vocabSize === "number" ? data.vocabSize : null;
+  } catch {
+    return null;
+  }
+}

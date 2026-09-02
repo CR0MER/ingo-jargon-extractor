@@ -20,6 +20,10 @@ export interface IngoState {
   showQueue: boolean;
   cutoffLo: number;
   cutoffHi: number;
+  /** Ceiling for the frequency-window slider — the reference corpus's
+   * real vocabulary size, fetched from GET /meta once at startup (see
+   * SET_VOCAB_SIZE). Starts at a placeholder until that resolves. */
+  maxRank: number;
   minOcc: number;
   grams: Record<NgramLength, boolean>;
   noEntities: boolean;
@@ -45,6 +49,7 @@ export const initialState: IngoState = {
   showQueue: true,
   cutoffLo: 6000,
   cutoffHi: 100000,
+  maxRank: 100000,
   minOcc: 3,
   grams: { 1: true, 2: true, 3: true },
   noEntities: true,
@@ -73,6 +78,7 @@ export type IngoAction =
   | { type: "RETRY" }
   | { type: "SET_CUTOFF_LO"; value: number }
   | { type: "SET_CUTOFF_HI"; value: number }
+  | { type: "SET_VOCAB_SIZE"; vocabSize: number }
   | { type: "INC_MIN_OCC" }
   | { type: "DEC_MIN_OCC" }
   | { type: "TOGGLE_GRAM"; ngram: NgramLength }
@@ -117,6 +123,16 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
       return { ...state, cutoffLo: Math.min(action.value, state.cutoffHi - 500) };
     case "SET_CUTOFF_HI":
       return { ...state, cutoffHi: Math.max(action.value, state.cutoffLo + 500) };
+    case "SET_VOCAB_SIZE":
+      // Bring the selected upper edge along too, but only while it's
+      // still sitting at the placeholder ceiling — once the user has
+      // actually dragged it, respect their choice instead of overriding
+      // it out from under them when the real size arrives.
+      return {
+        ...state,
+        maxRank: action.vocabSize,
+        cutoffHi: state.cutoffHi === state.maxRank ? action.vocabSize : state.cutoffHi,
+      };
     case "INC_MIN_OCC":
       return { ...state, minOcc: Math.min(12, state.minOcc + 1) };
     case "DEC_MIN_OCC":

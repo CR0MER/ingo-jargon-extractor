@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from pipeline.definitions import define
 from pipeline.nlp import tokenize
 from pipeline.parse import parse_file
-from pipeline.score import corpus_rank, katakana_to_hiragana, keyness
+from pipeline.score import _VOCAB_SIZE, corpus_rank, katakana_to_hiragana, keyness
 
 # Dunning's G^2 threshold for p < 0.0001 at 1 degree of freedom - the
 # standard corpus-linguistics keyness cutoff (Rayson & Garside 2000).
@@ -26,9 +26,21 @@ app = FastAPI(title="ingo-api")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
-    allow_methods=["POST"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+class Meta(BaseModel):
+    vocabSize: int
+
+
+@app.get("/meta", response_model=Meta)
+async def meta() -> Meta:
+    """The reference corpus's actual vocabulary size, so the frontend's
+    frequency-window slider can span the real data instead of a guessed
+    ceiling — and stays correct if freq_ja.json.gz is ever rebuilt."""
+    return Meta(vocabSize=_VOCAB_SIZE)
 
 
 class Term(BaseModel):

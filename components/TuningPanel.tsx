@@ -7,6 +7,7 @@ interface TuningPanelProps {
   enabled: boolean;
   cutoffLo: number;
   cutoffHi: number;
+  maxRank: number;
   minOcc: number;
   grams: Record<NgramLength, boolean>;
   noEntities: boolean;
@@ -33,6 +34,7 @@ export function TuningPanel({
   enabled,
   cutoffLo,
   cutoffHi,
+  maxRank,
   minOcc,
   grams,
   noEntities,
@@ -47,8 +49,9 @@ export function TuningPanel({
   onToggleKatakana,
   onTogglePos,
 }: TuningPanelProps) {
-  const windowLeft = ((cutoffLo - 1000) / 99000) * 100 + "%";
-  const windowRight = ((100000 - cutoffHi) / 99000) * 100 + "%";
+  const windowSpan = maxRank - 1000;
+  const windowLeft = ((cutoffLo - 1000) / windowSpan) * 100 + "%";
+  const windowRight = ((maxRank - cutoffHi) / windowSpan) * 100 + "%";
 
   return (
     <section
@@ -75,7 +78,7 @@ export function TuningPanel({
             type="range"
             data-dual="lo"
             min={1000}
-            max={100000}
+            max={maxRank}
             step={500}
             value={cutoffLo}
             onChange={(e) => onSetCutoffLo(Number(e.target.value))}
@@ -85,7 +88,7 @@ export function TuningPanel({
             type="range"
             data-dual="hi"
             min={1000}
-            max={100000}
+            max={maxRank}
             step={500}
             value={cutoffHi}
             onChange={(e) => onSetCutoffHi(Number(e.target.value))}
@@ -94,7 +97,7 @@ export function TuningPanel({
         </div>
         <div className="mt-1 flex justify-between text-10.5 text-text-muted">
           <span>1,000</span>
-          <span>100,000</span>
+          <span>{maxRank.toLocaleString()}</span>
         </div>
       </div>
 
