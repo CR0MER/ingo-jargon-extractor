@@ -61,4 +61,37 @@ describe("ingoReducer ingest lifecycle", () => {
     const state = ingoReducer(errored, { type: "RETRY" });
     expect(state).toMatchObject({ phase: "empty", error: null });
   });
+
+  it("RESET clears the file batch, results, and result-scoped view state, but leaves tuning settings alone", () => {
+    const dirty = {
+      ...initialState,
+      phase: "results" as const,
+      sourceNames: ["ep01.srt", "ep02.srt"],
+      terms: sampleTerms,
+      page: 3,
+      ignored: ["stale"],
+      search: "猫",
+      sortKey: "score" as const,
+      sortDir: 1 as const,
+      // Tuning settings should survive a reset.
+      cutoffLo: 5000,
+      noKatakana: true,
+    };
+
+    const state = ingoReducer(dirty, { type: "RESET" });
+
+    expect(state).toMatchObject({
+      phase: "empty",
+      sourceNames: [],
+      terms: [],
+      error: null,
+      page: 1,
+      ignored: [],
+      search: "",
+      sortKey: "count",
+      sortDir: -1,
+      cutoffLo: 5000,
+      noKatakana: true,
+    });
+  });
 });

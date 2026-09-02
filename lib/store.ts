@@ -76,6 +76,7 @@ export type IngoAction =
   | { type: "INGEST_SUCCESS"; terms: Term[] }
   | { type: "INGEST_ERROR"; message: string }
   | { type: "RETRY" }
+  | { type: "RESET" }
   | { type: "SET_CUTOFF_LO"; value: number }
   | { type: "SET_CUTOFF_HI"; value: number }
   | { type: "SET_VOCAB_SIZE"; vocabSize: number }
@@ -119,6 +120,22 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
       return { ...state, phase: "error", error: action.message };
     case "RETRY":
       return { ...state, phase: "empty", error: null };
+    case "RESET":
+      // Clears the file batch and any results, but leaves tuning settings
+      // (frequency window, min-occurrence, chips, filters) alone — those
+      // are the user's preferences, not tied to which files were loaded.
+      return {
+        ...state,
+        phase: "empty",
+        sourceNames: [],
+        terms: [],
+        error: null,
+        page: 1,
+        ignored: [],
+        search: "",
+        sortKey: "count",
+        sortDir: -1,
+      };
     case "SET_CUTOFF_LO":
       return { ...state, cutoffLo: Math.min(action.value, state.cutoffHi - 500) };
     case "SET_CUTOFF_HI":

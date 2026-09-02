@@ -28,6 +28,11 @@ export default function Page() {
   // New files join the existing batch rather than replacing it — a show's
   // jargon only shows up once enough episodes are in the same corpus, so
   // every submission re-scores the full accumulated set from scratch.
+  function clearFiles() {
+    setFiles([]);
+    dispatch({ type: "RESET" });
+  }
+
   async function submitFiles(newFiles: File[]) {
     const allFiles = [...files, ...newFiles];
     setFiles(allFiles);
@@ -85,6 +90,7 @@ export default function Page() {
               onToggleQueue={() => dispatch({ type: "TOGGLE_QUEUE" })}
               phase={state.phase}
               sourceNames={state.sourceNames}
+              onClear={clearFiles}
             />
             <TuningPanel
               enabled={state.phase === "results"}

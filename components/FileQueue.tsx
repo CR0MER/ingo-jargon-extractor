@@ -7,6 +7,7 @@ interface FileQueueProps {
   onToggleQueue: () => void;
   phase: Phase;
   sourceNames: string[];
+  onClear: () => void;
 }
 
 function queueEntry(phase: Phase) {
@@ -24,7 +25,13 @@ function queueEntry(phase: Phase) {
   };
 }
 
-export function FileQueue({ showQueue, onToggleQueue, phase, sourceNames }: FileQueueProps) {
+export function FileQueue({
+  showQueue,
+  onToggleQueue,
+  phase,
+  sourceNames,
+  onClear,
+}: FileQueueProps) {
   const queueLabel =
     phase === "empty"
       ? "idle"
@@ -41,7 +48,7 @@ export function FileQueue({ showQueue, onToggleQueue, phase, sourceNames }: File
         onClick={onToggleQueue}
         className="mb-3 flex cursor-pointer select-none items-baseline justify-between"
       >
-        <div className="text-10.5 font-semibold uppercase tracking-[0.09em] text-text-muted">
+        <div className="mt-[3px] text-10.5 font-semibold uppercase tracking-[0.09em] text-text-muted">
           Files
         </div>
         <div className="flex items-baseline gap-[7px]">
@@ -67,6 +74,15 @@ export function FileQueue({ showQueue, onToggleQueue, phase, sourceNames }: File
               </div>
             </div>
           ))}
+          <button
+            type="button"
+            title="Clear all files and start over"
+            disabled={phase === "running"}
+            onClick={onClear}
+            className="my-[5px] h-34 rounded-7 bg-danger text-13 font-medium text-white hover:bg-danger-hover disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Clear all files
+          </button>
         </div>
       )}
     </section>

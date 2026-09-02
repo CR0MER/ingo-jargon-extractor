@@ -16,7 +16,7 @@ export function SourcePanel({ onSubmitFiles }: SourcePanelProps) {
 
   return (
     <section className="border-b border-border-subtle p-5">
-      <div className="mb-3 text-10.5 font-semibold uppercase tracking-[0.09em] text-text-muted">
+      <div className="mb-3 mt-[3px] text-10.5 font-semibold uppercase tracking-[0.09em] text-text-muted">
         Source
       </div>
       <div

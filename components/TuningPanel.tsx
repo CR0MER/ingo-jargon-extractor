@@ -57,7 +57,7 @@ export function TuningPanel({
     <section
       className={`px-5 py-4.5 ${enabled ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-40"}`}
     >
-      <div className="mb-4 text-10.5 font-semibold uppercase tracking-[0.09em] text-text-muted">
+      <div className="mb-4 mt-[3px] text-10.5 font-semibold uppercase tracking-[0.09em] text-text-muted">
         Tuning
       </div>
 

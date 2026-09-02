@@ -36,6 +36,7 @@ const config: Config = {
         "accent-tint": "oklch(0.985 0.008 195)",
 
         danger: "oklch(0.55 0.19 25)",
+        "danger-hover": "oklch(0.48 0.19 25)",
         "danger-tint": "oklch(0.95 0.03 25)",
 
         overlay: "rgba(28,25,23,.34)",
