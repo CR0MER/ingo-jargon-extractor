@@ -144,7 +144,7 @@ export default function Page() {
       {state.modal === "export" && (
         <ExportModal
           format={state.format}
-          visibleCount={visibleTerms.length}
+          terms={visibleTerms}
           onSetFormat={(format) => dispatch({ type: "SET_FORMAT", format })}
           onClose={() => dispatch({ type: "CLOSE_MODAL" })}
         />

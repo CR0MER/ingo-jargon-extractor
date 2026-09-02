@@ -1,10 +1,11 @@
 from collections import Counter
 from typing import Optional
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from pipeline.anki_export import build_apkg
 from pipeline.definitions import define
 from pipeline.nlp import tokenize
 from pipeline.parse import parse_file
@@ -142,3 +143,26 @@ async def ingest(
         raise HTTPException(400, "No text extracted from input.")
 
     return _score_text(source_text, min_keyness, min_occurrence)
+
+
+class ExportCard(BaseModel):
+    front: str
+    reading: Optional[str] = None
+    back: str
+
+
+class ExportRequest(BaseModel):
+    cards: list[ExportCard]
+
+
+@app.post("/export/apkg")
+async def export_apkg(req: ExportRequest) -> Response:
+    if not req.cards:
+        raise HTTPException(400, "No cards to export.")
+
+    apkg_bytes = build_apkg([(c.front, c.reading or "", c.back) for c in req.cards])
+    return Response(
+        content=apkg_bytes,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": 'attachment; filename="ingo-export.apkg"'},
+    )

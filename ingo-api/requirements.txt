@@ -8,4 +8,5 @@ jamdict-data
 pysrt
 webvtt-py
 ftfy
+genanki
 pytest

@@ -47,3 +47,34 @@ export async function fetchVocabSize(): Promise<number | null> {
     return null;
   }
 }
+
+export interface ExportCard {
+  front: string;
+  /** Furigana reading, shown on the card's back only — see
+   * ingo-api/pipeline/anki_export.py's template. */
+  reading?: string;
+  back: string;
+}
+
+/** POSTs to /export/apkg and returns the raw .apkg file bytes as a Blob,
+ * ready to hand to a download link. Building a real Anki SQLite package
+ * happens server-side (via genanki) — see ingo-api/pipeline/anki_export.py. */
+export async function exportApkg(cards: ExportCard[]): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/export/apkg`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cards }),
+    });
+  } catch {
+    throw new Error(`Couldn't reach the export service at ${API_URL}.`);
+  }
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => null);
+    throw new Error(detail?.detail || `Export failed (${res.status}).`);
+  }
+
+  return res.blob();
+}
