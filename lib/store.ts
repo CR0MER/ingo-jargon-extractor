@@ -59,7 +59,7 @@ export const initialState: IngoState = {
   // magic terms, sci-fi tech words), not noise to hide by default.
   noKatakana: false,
   posOn: { NOUN: true, VERB: true, ADJ: true },
-  sortKey: "count",
+  sortKey: "score",
   sortDir: -1,
   page: 1,
   pageSize: 10,
@@ -113,7 +113,7 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
         page: 1,
         ignored: [],
         search: "",
-        sortKey: "count",
+        sortKey: "score",
         sortDir: -1,
       };
     case "INGEST_ERROR":
@@ -133,7 +133,7 @@ export function ingoReducer(state: IngoState, action: IngoAction): IngoState {
         page: 1,
         ignored: [],
         search: "",
-        sortKey: "count",
+        sortKey: "score",
         sortDir: -1,
       };
     case "SET_CUTOFF_LO":

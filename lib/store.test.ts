@@ -71,7 +71,7 @@ describe("ingoReducer ingest lifecycle", () => {
       page: 3,
       ignored: ["stale"],
       search: "猫",
-      sortKey: "score" as const,
+      sortKey: "count" as const,
       sortDir: 1 as const,
       // Tuning settings should survive a reset.
       cutoffLo: 5000,
@@ -88,7 +88,7 @@ describe("ingoReducer ingest lifecycle", () => {
       page: 1,
       ignored: [],
       search: "",
-      sortKey: "count",
+      sortKey: "score",
       sortDir: -1,
       cutoffLo: 5000,
       noKatakana: true,
