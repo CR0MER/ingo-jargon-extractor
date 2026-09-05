@@ -63,3 +63,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 npm test                       # frontend (Vitest)
 cd ingo-api && pytest pipeline # backend (pytest)
 ```
+
+# Credits
+JPDB v2.2 Frequency by Kuube
